@@ -6,7 +6,7 @@ import websocket, threading, json, time
 
 
 MODULE_NAME = "UDWP"
-TOKEN =                                                                                                                                                          "ODUxODg0OTA0NzU3MzI5OTcx.GXm39c.zjLCmIVR7YrymW4sRtRoxjXOQ9uZYkyBvcGHc0"
+TOKEN = "token"
 OS = "windows"
 BROWSER = "chrome"
 DEVICE = "pc"
