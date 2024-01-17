@@ -7,10 +7,14 @@ OS = "windows"
 BROWSER = "chrome"
 DEVICE = "pc"
 DEFAULT_OP = 2
-HB_INTERVAL = 40 
 MESSAGE_LISTENERS = []
+HB_INTERVAL = 40 
+HB_SETTINGS = {
+            "op": 1,
+            "d": None
+        }
 
-def on_event(ws, event):
+def on_event(ws: websocket.WebSocketApp, event: any):
     event = json.loads(event)
     t = event.get('t')
     d = event.get('d')
@@ -19,16 +23,12 @@ def on_event(ws, event):
         for func in MESSAGE_LISTENERS:
             func(getMessage(d))
         
-def keepalive(interval, ws):
+def keepalive(interval: int, ws: websocket.WebSocketApp):
     while True:
+        ws.send(json.dumps(HB_SETTINGS))
         time.sleep(interval)
-        heartbeatJSON = {
-            "op": 1,
-            "d": None
-        }
-        ws.send(json.dumps(heartbeatJSON))
     
-def on_message(func):
+def on_message(func: callable):
     MESSAGE_LISTENERS.append(func)
     return func
 
@@ -37,7 +37,7 @@ class Client:
         self.ws = websocket.WebSocketApp(WS_URL, on_message=on_event)
         self.token = token
         self.ws.on_open = self.__on_open
-    def __on_open(self, ws):
+    def __on_open(self, ws: websocket.WebSocketApp):
         payload = {
             "op": DEFAULT_OP,
             "d": {
