@@ -3,7 +3,6 @@ from .Guild import Guild
 from .User import User
 from .Message import Message
 
-
 def getAuthor(data) -> User:
     username = data['author']['username']
     id = data['author']['id']
@@ -15,31 +14,30 @@ def getAuthor(data) -> User:
     user.id = id
     user.global_name = global_name
     user.avatar = avatar
-    
+
     return user
 
 def getGuild(data) -> Guild:
-    guide_id = data['guide_id']
-    
+    guild_id = data['guild_id']
     guild = Guild()
-    guild.guild_id = guide_id
-    
+    guild.guild_id = guild_id
     return guild
 
 def getChannel(data) -> Channel:
     channel_id = data['channel_id']
-    guide = getGuild(data)
+    guild = getGuild(data)
     
-    channel = Channel()
-    channel.channel_id = channel_id
-    channel.guild = guide
+    channel: Channel = Channel()
+    channel.channel_id: int = channel_id
+    channel.guild: int = guild
     
-    return guide
+    return channel
 
 def getMessage(data) -> Message:
     channel = getChannel(data)
     guild = getGuild(data)
     author = getAuthor(data)
+    
     content = data['content']
     mention_everyone = data['mention_everyone']
     pinned = data['pinned']
@@ -52,5 +50,4 @@ def getMessage(data) -> Message:
     message.mention_everyone = mention_everyone
     message.pinned = pinned
     
-
     return message

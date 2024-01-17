@@ -1,10 +1,10 @@
-from .Guide import Guide
+from .Guild import Guild
 
 class PartialChannel:
     channel_id: int
 
 class ChannelParams(PartialChannel):
-    guild: Guide
+    guild: Guild
     
 class Channel(ChannelParams):
     def delete(self):

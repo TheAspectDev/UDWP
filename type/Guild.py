@@ -1,5 +1,3 @@
-from .Channel import Channel
-from .User import User
 
 
 class PartialGuild:
