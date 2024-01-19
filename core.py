@@ -12,6 +12,7 @@ BROWSER = "chrome"
 DEVICE = "pc"
 DEFAULT_OP = 2
 MESSAGE_LISTENERS = []
+MESSAGE_LISTENERS_FUNCTIONS = []
 HB_INTERVAL = 40
 HB_SETTINGS = {
     "op": 1,
@@ -23,11 +24,11 @@ req_session = requests.Session()
 def on_event(event: dict):
     t = event.get('t')
     d = event.get('d')
-    print(t)
 
     if t == "MESSAGE_CREATE" and d:
         for func in MESSAGE_LISTENERS:
-             asyncio.create_task(func(getMessage(d)))
+             task = asyncio.create_task(func(getMessage(d)))
+             MESSAGE_LISTENERS_FUNCTIONS.append(task)
 
 def sendPost(link: str, payload: dict):
     FULL_URL = DISCORD_ENDPOINT + link
@@ -75,4 +76,3 @@ class Client:
             await self.__on_open(ws)
             while True:
                 on_event(json.loads(await ws.recv()))
-                
