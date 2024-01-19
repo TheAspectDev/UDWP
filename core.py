@@ -1,43 +1,58 @@
-import websocket, threading, json, time
-from .type.Generator import *
+import json
+import asyncio
+import websockets
+from .types.Generator import *
+import requests
 
 MODULE_NAME = "UDWP"
 WS_URL = "wss://gateway.discord.gg/?v=6&encoding=json"
+DISCORD_ENDPOINT = "https://discord.com/api/v9/"
 OS = "windows"
 BROWSER = "chrome"
 DEVICE = "pc"
 DEFAULT_OP = 2
 MESSAGE_LISTENERS = []
-HB_INTERVAL = 40 
+HB_INTERVAL = 40
 HB_SETTINGS = {
-            "op": 1,
-            "d": None
-        }
+    "op": 1,
+    "d": None
+}
 
-def on_event(ws: websocket.WebSocketApp, event: any):
-    event = json.loads(event)
+req_session = requests.Session()
+
+def on_event(event: dict):
     t = event.get('t')
     d = event.get('d')
-    
+    print(t)
+
     if t == "MESSAGE_CREATE" and d:
         for func in MESSAGE_LISTENERS:
-            func(getMessage(d))
-        
-def keepalive(interval: int, ws: websocket.WebSocketApp):
+             asyncio.create_task(func(getMessage(d)))
+
+def sendPost(link: str, payload: dict):
+    FULL_URL = DISCORD_ENDPOINT + link
+    if 'Authorization' in req_session.headers:
+        return req_session.post(
+            FULL_URL,
+            json=payload,
+        )
+    else:
+        raise "Authorization Error"
+
+async def keepalive(interval: int, ws: websockets):
     while True:
-        ws.send(json.dumps(HB_SETTINGS))
-        time.sleep(interval)
-    
+        await ws.send(json.dumps(HB_SETTINGS))
+        await asyncio.sleep(interval)
+
 def on_message(func: callable):
     MESSAGE_LISTENERS.append(func)
     return func
 
 class Client:
     def __init__(self, token: str):
-        self.ws = websocket.WebSocketApp(WS_URL, on_message=on_event)
         self.token = token
-        self.ws.on_open = self.__on_open
-    def __on_open(self, ws: websocket.WebSocketApp):
+
+    async def __on_open(self, ws: websockets):
         payload = {
             "op": DEFAULT_OP,
             "d": {
@@ -49,8 +64,15 @@ class Client:
                 }
             },
         }
-        ws.send(json.dumps(payload))
-        threading.Thread(target=keepalive, args=(HB_INTERVAL, ws)).start()    
-    
-    def run(self):   
-        self.ws.run_forever()
+        await ws.send(json.dumps(payload))
+        asyncio.create_task(keepalive(HB_INTERVAL, ws))
+
+    async def run(self):
+        req_session.headers = {
+            "Authorization": self.token
+        }
+        async with websockets.connect(WS_URL, max_size=None) as ws:
+            await self.__on_open(ws)
+            while True:
+                on_event(json.loads(await ws.recv()))
+                

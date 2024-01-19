@@ -17,11 +17,14 @@ def getAuthor(data) -> User:
 
     return user
 
-def getGuild(data) -> Guild:
-    guild_id = data['guild_id']
-    guild = Guild()
-    guild.guild_id = guild_id
-    return guild
+def getGuild(data) -> Guild | None:
+    if "guild_id" in data:
+        guild_id = data['guild_id']
+        guild = Guild()
+        guild.guild_id = guild_id
+        return guild
+    else:
+        return None
 
 def getChannel(data) -> Channel:
     channel_id = data['channel_id']
@@ -39,11 +42,13 @@ def getMessage(data) -> Message:
     author = getAuthor(data)
     
     content = data['content']
+    message_id = data['id']
     mention_everyone = data['mention_everyone']
     pinned = data['pinned']
     
     message = Message()
     message.channel = channel
+    message.message_id = message_id
     message.author = author
     message.guild = guild
     message.content = content
