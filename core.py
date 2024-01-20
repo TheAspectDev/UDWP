@@ -38,7 +38,7 @@ def sendPost(link: str, payload: dict):
             json=payload,
         )
     else:
-        raise "Authorization Error"
+        raise InterruptedError
 
 async def keepalive(interval: int, ws: websockets):
     while True:
