@@ -11,7 +11,7 @@ class Channel(ChannelParams):
         ...
         
     def send(self, content: str):
-        from ..core import sendPost
-        sendPost(f"channels/{self.channel_id}/messages", {
+        from ..core import make_request
+        make_request("post", f"channels/{self.channel_id}/messages", {
             "content": content,
         })

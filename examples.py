@@ -3,7 +3,7 @@ from UDWP.type import Message
 import asyncio
 
 client = Client(
-    token="ODUxODg0OTA0NzU3MzI5OTcx.GPwbKt.oBakpZDB-aFzJyoIK-bvlJ9eK6WEEd52Ffjyao"
+    token="your_token_here"
 )
 @client.on_start
 async def Start():
