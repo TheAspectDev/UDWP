@@ -1,2 +1,2 @@
 from . import core
-from . import mtypes
+from . import type
