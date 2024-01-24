@@ -12,5 +12,7 @@ class User(UserParams):
     def block(self):
         ...
 
+    def add_friend(self):
+        ...
 
 

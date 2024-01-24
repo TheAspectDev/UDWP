@@ -1,8 +1,11 @@
 import json
 import asyncio
+from typing import Literal
 import websockets
 from .type.Generator import *
 import requests
+from time import sleep as tsleep
+import threading
 
 MODULE_NAME = "UDWP"
 WS_URL = "wss://gateway.discord.gg/?v=6&encoding=json"
@@ -13,12 +16,12 @@ DEVICE = "pc"
 DEFAULT_OP = 2
 MESSAGE_LISTENERS = []
 MESSAGE_LISTENERS_FUNCTIONS = []
+TASK_LISTENERS = []
 HB_INTERVAL = 40
 HB_SETTINGS = {
     "op": 1,
     "d": None
 }
-
 req_session = requests.Session()
 
 def on_event(event: dict):
@@ -37,17 +40,31 @@ def on_event(event: dict):
             if func[1] == "CONNECTION_CREATE":
                 task = asyncio.create_task(func[0]())
                 MESSAGE_LISTENERS_FUNCTIONS.append([task, "CONNECTION_CREATE"])
+        for task in TASK_LISTENERS:
+            task()
         
 
-def sendPost(link: str, payload: dict):
-    FULL_URL = DISCORD_ENDPOINT + link
-    if 'Authorization' in req_session.headers:
-        return req_session.post(
-            FULL_URL,
-            json=payload,
-        )
+def make_request(method: Literal["get",
+                                "post",
+                                "patch",
+                                "delete"],
+                 link: str,
+                 payload=None):
+    
+    full_url = DISCORD_ENDPOINT + link
+    if 'Authorization' not in req_session.headers:
+        raise Exception("Authorization header is missing.")
+
+    if method == 'get':
+        return req_session.get(full_url)
+    elif method == 'post':
+        return req_session.post(full_url, json=payload)
+    elif method == 'patch':
+        return req_session.patch(full_url, json=payload)
+    elif method == 'delete':
+        return req_session.delete(full_url)
     else:
-        raise "Authorization Error"
+        raise ValueError(f"Unsupported HTTP method: {method}")
 
 async def keepalive(interval: int, ws: websockets):
     while True:
@@ -80,6 +97,10 @@ class Client:
         MESSAGE_LISTENERS.append([func, "MESSAGE_CREATE"])
         return func
 
+    async def create_task(self, func):
+        task = asyncio.create_task(func)
+        return task
+
     async def __run(self):
         req_session.headers = {
             "Authorization": self.token
@@ -89,9 +110,6 @@ class Client:
             while True:
                 on_event(json.loads(await ws.recv()))
                 
-    async def create_task(self, func):
-        task = asyncio.create_task(func)
-        return task
         
     def run(self):
         asyncio.run(self.__run())    

@@ -16,12 +16,19 @@ class MessageParams(PartialMessage):
     
     
 class Message(MessageParams):
-    def delete(self):
-        ...
+    def edit(self, content: str):
+        from ..core import make_request
+        data = make_request("patch",f"channels/{self.channel.channel_id}/messages/{self.message_id}", {
+            "content": content,
+        })
+        if (data.status_code != 200):
+            raise Exception("Request Error")
+        
+        return data
     
     def replay(self, content: str):
-        from ..core import sendPost
-        sendPost(f"channels/{self.channel.channel_id}/messages", {
+        from ..core import make_request
+        data = make_request("post" ,f"channels/{self.channel.channel_id}/messages", {
             "content": content,
             "message_reference": {
                 "channel_id": self.channel.channel_id,
@@ -29,3 +36,17 @@ class Message(MessageParams):
                 "message_id": self.message_id,
             }
         })
+        
+        if (data.status_code != 200):
+            raise Exception("Request Error")
+        
+        return data
+        
+    def delete(self):
+        from ..core import make_request
+        data = make_request("delete", f"channels/{self.channel.channel_id}/messages/{self.message_id}")
+        
+        if (data.status_code not in [200, 204]):
+            raise Exception(data.json()['message'])
+        
+        return data

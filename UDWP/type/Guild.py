@@ -9,8 +9,5 @@ class GuildParams(PartialGuild):
     ...
     
 class Guild(GuildParams):
-    def delete(self):
-        ...
-    
-    def replay(self):
+    def leave(self):
         ...
