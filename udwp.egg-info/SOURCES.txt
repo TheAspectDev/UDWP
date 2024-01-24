@@ -1,0 +1,14 @@
+setup.py
+UDWP/__init__.py
+UDWP/core.py
+UDWP/mtypes/Channel.py
+UDWP/mtypes/Generator.py
+UDWP/mtypes/Guild.py
+UDWP/mtypes/Message.py
+UDWP/mtypes/User.py
+UDWP/mtypes/__init__.py
+udwp.egg-info/PKG-INFO
+udwp.egg-info/SOURCES.txt
+udwp.egg-info/dependency_links.txt
+udwp.egg-info/requires.txt
+udwp.egg-info/top_level.txt

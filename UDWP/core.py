@@ -1,7 +1,7 @@
 import json
 import asyncio
 import websockets
-from .types.Generator import *
+from .mtypes.Generator import *
 import requests
 
 MODULE_NAME = "UDWP"

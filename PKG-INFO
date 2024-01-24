@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: udwp
+Version: 0.0.1
+Requires-Dist: websockets
+Requires-Dist: asyncio
+Requires-Dist: requests
