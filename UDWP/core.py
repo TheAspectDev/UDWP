@@ -1,7 +1,7 @@
 import json
 import asyncio
 import websockets
-from .mtypes.Generator import *
+from .type.Generator import *
 import requests
 
 MODULE_NAME = "UDWP"
@@ -76,3 +76,6 @@ class Client:
             await self.__on_open(ws)
             while True:
                 on_event(json.loads(await ws.recv()))
+                
+                
+__all__ = ['Client', 'on_message']
