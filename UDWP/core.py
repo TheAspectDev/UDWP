@@ -24,11 +24,20 @@ req_session = requests.Session()
 def on_event(event: dict):
     t = event.get('t')
     d = event.get('d')
-
+    op = event.get('op')
+    
     if t == "MESSAGE_CREATE" and d:
         for func in MESSAGE_LISTENERS:
-             task = asyncio.create_task(func(getMessage(d)))
-             MESSAGE_LISTENERS_FUNCTIONS.append(task)
+            if func[1] == "MESSAGE_CREATE":
+                task = asyncio.create_task(func[0](getMessage(d)))
+                MESSAGE_LISTENERS_FUNCTIONS.append([task, "MESSAGE_CREATE"])
+    
+    if op == 10:
+        for func in MESSAGE_LISTENERS:
+            if func[1] == "CONNECTION_CREATE":
+                task = asyncio.create_task(func[0]())
+                MESSAGE_LISTENERS_FUNCTIONS.append([task, "CONNECTION_CREATE"])
+        
 
 def sendPost(link: str, payload: dict):
     FULL_URL = DISCORD_ENDPOINT + link
@@ -64,11 +73,14 @@ class Client:
         await ws.send(json.dumps(payload))
         asyncio.create_task(keepalive(HB_INTERVAL, ws))
         
+    def on_start(self, func: callable):
+        MESSAGE_LISTENERS.append([func, "CONNECTION_CREATE"])
+        return func
     def on_message(self, func: callable):
-        MESSAGE_LISTENERS.append(func)
+        MESSAGE_LISTENERS.append([func, "MESSAGE_CREATE"])
         return func
 
-    async def run(self):
+    async def __run(self):
         req_session.headers = {
             "Authorization": self.token
         }
@@ -77,5 +89,9 @@ class Client:
             while True:
                 on_event(json.loads(await ws.recv()))
                 
-                
-__all__ = ['Client']
+    async def create_task(self, func):
+        task = asyncio.create_task(func)
+        return task
+        
+    def run(self):
+        asyncio.run(self.__run())    
