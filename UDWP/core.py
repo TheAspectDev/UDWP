@@ -45,10 +45,6 @@ async def keepalive(interval: int, ws: websockets):
         await ws.send(json.dumps(HB_SETTINGS))
         await asyncio.sleep(interval)
 
-def on_message(func: callable):
-    MESSAGE_LISTENERS.append(func)
-    return func
-
 class Client:
     def __init__(self, token: str):
         self.token = token
@@ -67,6 +63,10 @@ class Client:
         }
         await ws.send(json.dumps(payload))
         asyncio.create_task(keepalive(HB_INTERVAL, ws))
+        
+    def on_message(self, func: callable):
+        MESSAGE_LISTENERS.append(func)
+        return func
 
     async def run(self):
         req_session.headers = {
@@ -78,4 +78,4 @@ class Client:
                 on_event(json.loads(await ws.recv()))
                 
                 
-__all__ = ['Client', 'on_message']
+__all__ = ['Client']
