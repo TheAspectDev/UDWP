@@ -2,8 +2,12 @@
 This library is under development and shouldn't be used in production.	
 - User Discord Wrapper written in Python.	
 
-## Basic Usage	
-
+## Getting Started
+Download the library using:
+```shell
+pip install git+https://github.com/TheAspectDev/UDWP.git
+```
+Code your own self-bot :
 ```py	
 from UDWP.core import Client
 from UDWP.type import Message
